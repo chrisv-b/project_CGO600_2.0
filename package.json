@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "One-time firmware flash platform for Tenways CGO600 e-bike",
   "main": "index.js",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "dev": "vercel dev",
     "build": "echo 'No build step required'",
