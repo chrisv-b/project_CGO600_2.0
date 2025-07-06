@@ -12,6 +12,8 @@
     "start": "vercel dev",
     "generate-codes": "node scripts/generate-codes.js",
     "test-api": "node scripts/test-api.js",
+    "setup-firebase": "node scripts/setup-firebase.js",
+    "setup-vercel-env": "node scripts/setup-vercel-env.js",
     "deploy": "bash scripts/deploy.sh",
     "deploy:windows": "scripts\\deploy.bat"
   },

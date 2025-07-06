@@ -33,9 +33,23 @@ Een webapplicatie waarmee gebruikers met een unieke activatiecode exact één ke
 
 ## 🚀 Setup
 
-### 1. Firebase Setup
+### 1. Firebase Setup (Automatisch)
 
-1. Maak een nieuw Firebase project aan
+**Aanbevolen methode:**
+```bash
+# Start de Firebase setup helper
+npm run setup-firebase
+
+# Volg de instructies op het scherm
+# Download je service account JSON bestand
+# Plaats het als 'serviceAccountKey.json' in de root
+
+# Automatische environment variables setup
+npm run setup-vercel-env
+```
+
+**Handmatige methode:**
+1. Maak een nieuw Firebase project aan op [Firebase Console](https://console.firebase.google.com/)
 2. Ga naar Project Settings > Service Accounts
 3. Genereer een nieuwe private key
 4. Download het JSON bestand
