@@ -2,7 +2,7 @@
 async function testAPI() {
     try {
         console.log('Testing API...');
-        const response = await fetch('https://project-cgo-600-oo9rvwdc1-tenways-32kphs-projects.vercel.app/api/validate?code=test-123', {
+        const response = await fetch('https://project-cgo-600-dpxbgef1p-tenways-32kphs-projects.vercel.app/validate.html?code=test-123', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'

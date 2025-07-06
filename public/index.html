@@ -428,7 +428,7 @@
 
             async validateCode(code) {
                 try {
-                    const response = await fetch(`/api/validate.html?code=${encodeURIComponent(code)}`);
+                    const response = await fetch(`/validate.html?code=${encodeURIComponent(code)}`);
                     const text = await response.text();
                     
                     // Parse the JSON from the HTML response
