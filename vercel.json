@@ -14,18 +14,16 @@
   "routes": [
     {
       "src": "/rollback.bin",
-      "dest": "/private_firmware/rollback.bin"
-    }
-  ],
-  "headers": [
+      "dest": "/private_firmware/rollback.bin",
+      "headers": {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+      }
+    },
     {
-      "source": "/private_firmware/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, proxy-revalidate"
-        }
-      ]
+      "src": "/private_firmware/(.*)",
+      "headers": {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+      }
     }
   ]
 } 
