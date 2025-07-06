@@ -1,0 +1,33 @@
+{
+  "name": "cgo600-flash",
+  "version": "1.0.0",
+  "description": "One-time firmware flash platform for Tenways CGO600 e-bike",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "vercel dev",
+    "generate-codes": "node scripts/generate-codes.js",
+    "test-api": "node scripts/test-api.js",
+    "deploy": "bash scripts/deploy.sh",
+    "deploy:windows": "scripts\\deploy.bat"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.11.0",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.0",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "vercel": "^32.5.0"
+  },
+  "keywords": [
+    "firmware",
+    "bluetooth",
+    "dfu",
+    "ebike",
+    "tenways"
+  ],
+  "author": "CGO600 Flash Team",
+  "license": "MIT"
+} 

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGO600 Firmware Flash Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .progress {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            text-shadow: 0 0 2px rgba(255,255,255,0.8);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .bluetooth-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .bluetooth-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .bluetooth-icon.connected {
+            background: #28a745;
+        }
+
+        .bluetooth-icon.disconnected {
+            background: #dc3545;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚲 CGO600 Firmware Flash</h1>
+            <p>Voer je activatiecode in om de aangepaste firmware te installeren</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Instructies:</h3>
+            <ol>
+                <li>Zorg dat je fiets aan staat en Bluetooth aan is</li>
+                <li>Voer je unieke activatiecode in</li>
+                <li>Klik op "Start Flash" en volg de instructies</li>
+                <li>Wacht tot het proces voltooid is</li>
+            </ol>
+        </div>
+
+        <div class="bluetooth-status">
+            <div class="bluetooth-icon disconnected" id="bluetoothIcon"></div>
+            <span id="bluetoothStatus">Bluetooth niet verbonden</span>
+        </div>
+
+        <form id="flashForm">
+            <div class="form-group">
+                <label for="activationCode">Activatiecode:</label>
+                <input 
+                    type="text" 
+                    id="activationCode" 
+                    placeholder="Voer je activatiecode in..."
+                    required
+                    pattern="[a-zA-Z0-9-]+"
+                    title="Alleen letters, cijfers en streepjes toegestaan"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="flashBtn">
+                🔥 Start Flash
+            </button>
+        </form>
+
+        <button class="btn btn-secondary" id="rollbackBtn">
+            🔄 Herstel naar originele firmware
+        </button>
+
+        <div id="status" class="status hidden"></div>
+        
+        <div class="progress hidden" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+            <div class="progress-text" id="progressText">0%</div>
+        </div>
+    </div>
+
+    <!-- DFU Library -->
+    <script src="https://unpkg.com/@nordicsemiconductor/pc-nrfconnect-dfu@4.0.0/dist/dfu.js"></script>
+    
+    <script>
+        class CGO600Flasher {
+            constructor() {
+                this.currentCode = null;
+                this.device = null;
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.checkBluetoothSupport();
+                this.addPageLeaveWarning();
+            }
+
+            bindEvents() {
+                document.getElementById('flashForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.startFlash();
+                });
+
+                document.getElementById('rollbackBtn').addEventListener('click', () => {
+                    this.startRollback();
+                });
+            }
+
+            checkBluetoothSupport() {
+                if (!navigator.bluetooth) {
+                    this.showStatus('Bluetooth wordt niet ondersteund in deze browser', 'error');
+                    this.disableButtons();
+                    return false;
+                }
+                return true;
+            }
+
+            disableButtons() {
+                const flashBtn = document.getElementById('flashBtn');
+                const rollbackBtn = document.getElementById('rollbackBtn');
+                const input = document.getElementById('activationCode');
+                
+                flashBtn.disabled = true;
+                rollbackBtn.disabled = true;
+                input.disabled = true;
+                
+                flashBtn.textContent = '❌ Bluetooth niet ondersteund';
+                rollbackBtn.textContent = '❌ Bluetooth niet ondersteund';
+            }
+
+            async startFlash() {
+                const code = document.getElementById('activationCode').value.trim();
+                if (!code) {
+                    this.showStatus('Voer een activatiecode in', 'error');
+                    return;
+                }
+
+                this.currentCode = code;
+                this.showStatus('Code valideren...', 'info');
+                this.setLoading(true);
+
+                try {
+                    // Step 1: Validate code
+                    const validation = await this.validateCode(code);
+                    if (!validation.success) {
+                        this.showStatus(validation.error, 'error');
+                        return;
+                    }
+
+                    this.showStatus('Code geldig! Verbinding maken met fiets...', 'success');
+
+                    // Step 2: Connect to device
+                    const device = await this.connectToDevice();
+                    if (!device) {
+                        this.showStatus('Kon geen verbinding maken met de fiets', 'error');
+                        return;
+                    }
+
+                    this.showStatus('Verbonden! Firmware downloaden...', 'info');
+
+                    // Step 3: Download firmware
+                    const firmware = await this.downloadFirmware(code);
+                    if (!firmware) {
+                        this.showStatus('Kon firmware niet downloaden', 'error');
+                        return;
+                    }
+
+                    this.showStatus('Firmware gedownload! Flashen...', 'info');
+                    this.showProgress();
+
+                    // Step 4: Flash firmware
+                    const flashResult = await this.flashFirmware(device, firmware);
+                    if (!flashResult.success) {
+                        this.showStatus(`Flash mislukt: ${flashResult.error}`, 'error');
+                        return;
+                    }
+
+                    this.showStatus('Flash succesvol! Code markeren als gebruikt...', 'success');
+
+                    // Step 5: Mark code as used
+                    const markResult = await this.markCodeAsUsed(code);
+                    if (!markResult.success) {
+                        this.showStatus('Flash voltooid, maar kon code niet markeren als gebruikt', 'error');
+                        return;
+                    }
+
+                    this.showStatus('✅ Flash succesvol voltooid! Je fiets heeft nu de aangepaste firmware.', 'success');
+                    this.hideProgress();
+
+                } catch (error) {
+                    console.error('Flash error:', error);
+                    this.showStatus(`Er is een fout opgetreden: ${error.message}`, 'error');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            async startRollback() {
+                if (!this.checkBluetoothSupport()) return;
+
+                this.showStatus('Rollback starten...', 'info');
+                this.setLoading(true);
+
+                try {
+                    // Connect to device
+                    const device = await this.connectToDevice();
+                    if (!device) {
+                        this.showStatus('Kon geen verbinding maken met de fiets', 'error');
+                        return;
+                    }
+
+                    this.showStatus('Verbonden! Originele firmware downloaden...', 'info');
+
+                    // Download rollback firmware
+                    const firmware = await this.downloadRollbackFirmware();
+                    if (!firmware) {
+                        this.showStatus('Kon originele firmware niet downloaden', 'error');
+                        return;
+                    }
+
+                    this.showStatus('Originele firmware gedownload! Flashen...', 'info');
+                    this.showProgress();
+
+                    // Flash rollback firmware
+                    const flashResult = await this.flashFirmware(device, firmware);
+                    if (!flashResult.success) {
+                        this.showStatus(`Rollback mislukt: ${flashResult.error}`, 'error');
+                        return;
+                    }
+
+                    this.showStatus('✅ Rollback succesvol! Je fiets heeft nu de originele firmware.', 'success');
+                    this.hideProgress();
+
+                } catch (error) {
+                    console.error('Rollback error:', error);
+                    this.showStatus(`Er is een fout opgetreden: ${error.message}`, 'error');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            async validateCode(code) {
+                try {
+                    const response = await fetch(`/api/validate?code=${encodeURIComponent(code)}`);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        return { success: true };
+                    } else {
+                        return { success: false, error: data.error };
+                    }
+                } catch (error) {
+                    return { success: false, error: 'Netwerkfout bij valideren' };
+                }
+            }
+
+            async connectToDevice() {
+                try {
+                    // Request Bluetooth device with DFU service
+                    const device = await navigator.bluetooth.requestDevice({
+                        filters: [
+                            { namePrefix: 'CGO600' },
+                            { namePrefix: 'Tenways' },
+                            { services: ['0000fe59-0000-1000-8000-00805f9b34fb'] } // Nordic DFU service
+                        ],
+                        optionalServices: ['0000fe59-0000-1000-8000-00805f9b34fb']
+                    });
+
+                    // Connect to device
+                    const server = await device.gatt.connect();
+                    this.updateBluetoothStatus(true);
+                    
+                    return { device, server };
+                } catch (error) {
+                    console.error('Bluetooth connection error:', error);
+                    this.updateBluetoothStatus(false);
+                    
+                    // Provide more specific error messages
+                    if (error.name === 'NotFoundError') {
+                        throw new Error('Geen CGO600 fiets gevonden. Controleer of Bluetooth aan staat en de fiets in de buurt is.');
+                    } else if (error.name === 'NotAllowedError') {
+                        throw new Error('Bluetooth toestemming geweigerd. Geef toestemming om door te gaan.');
+                    } else if (error.name === 'NetworkError') {
+                        throw new Error('Verbindingsfout. Controleer of de fiets aan staat en probeer opnieuw.');
+                    } else {
+                        throw new Error(`Bluetooth fout: ${error.message}`);
+                    }
+                }
+            }
+
+            async downloadFirmware(code) {
+                try {
+                    const response = await fetch(`/api/get-firmware?code=${encodeURIComponent(code)}`);
+                    
+                    if (!response.ok) {
+                        const data = await response.json();
+                        throw new Error(data.error || 'Firmware download mislukt');
+                    }
+
+                    return await response.arrayBuffer();
+                } catch (error) {
+                    console.error('Firmware download error:', error);
+                    return null;
+                }
+            }
+
+            async downloadRollbackFirmware() {
+                try {
+                    const response = await fetch('/rollback.bin');
+                    
+                    if (!response.ok) {
+                        throw new Error('Rollback firmware download mislukt');
+                    }
+
+                    return await response.arrayBuffer();
+                } catch (error) {
+                    console.error('Rollback firmware download error:', error);
+                    return null;
+                }
+            }
+
+            async flashFirmware(deviceInfo, firmware) {
+                try {
+                    // Check if DFU library is loaded
+                    if (typeof window.DFU === 'undefined') {
+                        throw new Error('DFU library niet geladen. Controleer je internetverbinding.');
+                    }
+
+                    // Use Nordic DFU library
+                    const dfu = new window.DFU(deviceInfo.device, deviceInfo.server);
+                    
+                    return new Promise((resolve, reject) => {
+                        dfu.on('progress', (progress) => {
+                            // Handle both percentage (0-100) and decimal (0-1) progress values
+                            const percentage = progress <= 1 ? progress * 100 : progress;
+                            this.updateProgress(percentage);
+                        });
+
+                        dfu.on('complete', () => {
+                            resolve({ success: true });
+                        });
+
+                        dfu.on('error', (error) => {
+                            reject(new Error(error.message));
+                        });
+
+                        // Start DFU process
+                        dfu.start(firmware);
+                    });
+                } catch (error) {
+                    console.error('Flash error:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+
+            async markCodeAsUsed(code) {
+                try {
+                    const response = await fetch(`/api/mark-used?code=${encodeURIComponent(code)}`);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        return { success: true };
+                    } else {
+                        return { success: false, error: data.error };
+                    }
+                } catch (error) {
+                    return { success: false, error: 'Netwerkfout bij markeren' };
+                }
+            }
+
+            showStatus(message, type) {
+                const statusEl = document.getElementById('status');
+                statusEl.textContent = message;
+                statusEl.className = `status ${type}`;
+                statusEl.classList.remove('hidden');
+            }
+
+            setLoading(loading) {
+                const flashBtn = document.getElementById('flashBtn');
+                const rollbackBtn = document.getElementById('rollbackBtn');
+                const input = document.getElementById('activationCode');
+                
+                flashBtn.disabled = loading;
+                rollbackBtn.disabled = loading;
+                input.disabled = loading;
+                
+                flashBtn.textContent = loading ? '⏳ Bezig...' : '🔥 Start Flash';
+                rollbackBtn.textContent = loading ? '⏳ Bezig...' : '🔄 Herstel naar originele firmware';
+            }
+
+            showProgress() {
+                document.getElementById('progressContainer').classList.remove('hidden');
+            }
+
+            hideProgress() {
+                document.getElementById('progressContainer').classList.add('hidden');
+                this.updateProgress(0);
+                document.getElementById('progressText').textContent = '0%';
+            }
+
+            updateProgress(percentage) {
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                
+                // Ensure percentage is between 0 and 100
+                const clampedPercentage = Math.max(0, Math.min(100, percentage));
+                
+                progressBar.style.width = `${clampedPercentage}%`;
+                progressText.textContent = `${Math.round(clampedPercentage)}%`;
+            }
+
+            updateBluetoothStatus(connected) {
+                const icon = document.getElementById('bluetoothIcon');
+                const status = document.getElementById('bluetoothStatus');
+                
+                if (connected) {
+                    icon.className = 'bluetooth-icon connected';
+                    status.textContent = 'Bluetooth verbonden';
+                } else {
+                    icon.className = 'bluetooth-icon disconnected';
+                    status.textContent = 'Bluetooth niet verbonden';
+                }
+            }
+
+            addPageLeaveWarning() {
+                let isFlashing = false;
+                
+                // Track flash state
+                const originalSetLoading = this.setLoading.bind(this);
+                this.setLoading = function(loading) {
+                    isFlashing = loading;
+                    originalSetLoading(loading);
+                };
+
+                // Warn user when leaving page during flash
+                window.addEventListener('beforeunload', (e) => {
+                    if (isFlashing) {
+                        e.preventDefault();
+                        e.returnValue = 'Je bent bezig met flashen. Weet je zeker dat je de pagina wilt verlaten?';
+                        return e.returnValue;
+                    }
+                });
+            }
+        }
+
+        // Initialize the flasher when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new CGO600Flasher();
+        });
+    </script>
+</body>
+</html> 
