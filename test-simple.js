@@ -1,0 +1,19 @@
+// Simple test
+async function testAPI() {
+    try {
+        console.log('Testing API...');
+        const response = await fetch('https://project-cgo-600-oo9rvwdc1-tenways-32kphs-projects.vercel.app/api/validate?code=test-123', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        console.log('Status:', response.status);
+        const text = await response.text();
+        console.log('Response:', text);
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+}
+
+testAPI(); 

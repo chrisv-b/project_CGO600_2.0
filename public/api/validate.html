@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Validate API</title>
+</head>
+<body>
+    <script>
+        // Get the code from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        if (!code) {
+            document.body.innerHTML = JSON.stringify({ error: 'Activation code is required' });
+        } else {
+            // For now, return a simple response
+            // In a real implementation, this would call Firebase
+            document.body.innerHTML = JSON.stringify({ 
+                error: 'Firebase not configured - please set up environment variables' 
+            });
+        }
+    </script>
+</body>
+</html> 

@@ -428,15 +428,21 @@
 
             async validateCode(code) {
                 try {
-                    const response = await fetch(`/api/validate?code=${encodeURIComponent(code)}`);
-                    const data = await response.json();
+                    const response = await fetch(`/api/validate.html?code=${encodeURIComponent(code)}`);
+                    const text = await response.text();
                     
-                    if (response.ok) {
-                        return { success: true };
-                    } else {
+                    // Parse the JSON from the HTML response
+                    const data = JSON.parse(text);
+                    
+                    if (data.error && data.error.includes('Firebase not configured')) {
+                        return { success: false, error: 'Server configuratie fout - Firebase niet ingesteld' };
+                    } else if (data.error) {
                         return { success: false, error: data.error };
+                    } else {
+                        return { success: true };
                     }
                 } catch (error) {
+                    console.error('Validation error:', error);
                     return { success: false, error: 'Netwerkfout bij valideren' };
                 }
             }
