@@ -28,6 +28,12 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Check if Firebase is properly configured
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+      console.error('Firebase environment variables not configured');
+      return res.status(500).json({ error: 'Server configuration error - Firebase not configured' });
+    }
+
     // Check if code exists and is valid
     const tokenRef = db.collection('tokens').doc(code);
     const tokenDoc = await tokenRef.get();
@@ -58,6 +64,16 @@ module.exports = async (req, res) => {
 
   } catch (error) {
     console.error('Validation error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    
+    // Provide more specific error messages
+    if (error.code === 'app/no-app') {
+      return res.status(500).json({ error: 'Firebase not initialized properly' });
+    } else if (error.code === 'permission-denied') {
+      return res.status(500).json({ error: 'Firebase permission denied - check service account' });
+    } else if (error.code === 'unavailable') {
+      return res.status(500).json({ error: 'Firebase service unavailable' });
+    } else {
+      return res.status(500).json({ error: 'Internal server error: ' + error.message });
+    }
   }
 }; 
